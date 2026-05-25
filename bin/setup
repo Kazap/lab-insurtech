@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+APP_ROOT = File.expand_path("..", __dir__)
+APP_NAME = "lab-insurtech (SafeCover)"
+
+def system!(*args)
+  system(*args, exception: true)
+end
+
+FileUtils.chdir APP_ROOT do
+  puts "== Verificando versão do Ruby =="
+  ruby_version = RUBY_VERSION
+  expected = "4.0.5"
+  unless ruby_version == expected
+    puts "  ⚠  Esperado Ruby #{expected}, encontrado #{ruby_version}"
+    puts "  Recomendado: 'asdf install' ou 'rbenv install #{expected}'"
+    puts "  Continuando mesmo assim..."
+  else
+    puts "  ✓ Ruby #{ruby_version}"
+  end
+
+  puts "\n== Instalando dependências =="
+  system("bundle check") || system!("bundle install")
+
+  puts "\n== Preparando banco de dados =="
+  system! "bin/rails db:prepare"
+
+  puts "\n== Removendo logs antigos e arquivos temporários =="
+  system! "bin/rails log:clear tmp:clear"
+
+  puts "\n== Rodando suite de testes =="
+  system! "bundle exec rspec --fail-fast"
+
+  puts "\n== Setup completo para #{APP_NAME} =="
+  puts "Comece com: bin/rails s"
+  puts "Ou inicie Claude Code no diretório: claude"
+end

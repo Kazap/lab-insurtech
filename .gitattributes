@@ -1,0 +1,14 @@
+# See https://git-scm.com/docs/gitattributes for more about git attribute files.
+
+# Mark the database schema as having been generated.
+db/schema.rb linguist-generated
+
+# Mark any vendored files as having been vendored.
+vendor/* linguist-vendored
+
+# Convert to LF line endings on checkout.
+*.rb     text eol=lf
+*.yml    text eol=lf
+*.md     text eol=lf
+*.json   text eol=lf
+*.sh     text eol=lf
