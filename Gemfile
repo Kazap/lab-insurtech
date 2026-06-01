@@ -32,3 +32,5 @@ end
 
 # Brasil-specific
 gem "cpf_cnpj", "~> 0.5"
+
+gem "ruby-lsp", "~> 0.26.9"
