@@ -99,3 +99,106 @@ puts <<~SUMMARY
   - #{Claim.count} claims
   - #{PremiumPayment.count} premium_payments
 SUMMARY
+
+# =============================================================================
+# DEMO SESSÃO 5 — casos determinísticos de vigência
+# -----------------------------------------------------------------------------
+# Cole este bloco NO FIM do db/seeds.rb (depois do Faker).
+#
+# Por quê: o seed com Faker cria todos os claims DENTRO da vigência e todas as
+# policies como "active". A demo da Sessão 5 (validação que recusa sinistro fora
+# do período) precisa de casos FORA para a regra ter o que pegar.
+#
+# Este bloco é ADITIVO e IDEMPOTENTE (não dá delete_all, usa find_or_create_by!):
+# pode rodar junto com o seed principal sem apagar os dados do Faker, e rodar
+# mais de uma vez sem duplicar.
+#
+# Datas ancoradas relativas a HOJE, para a demo ser previsível em qualquer dia.
+# A "expiração" é por DATA (expiration_date no passado), não pelo campo status —
+# o enum de Policy pode não aceitar "expired", e a validação da demo olha as datas:
+#   policy DEMO-ATIVA   : effective hoje-6m .. expiration hoje+6m   (vigente)
+#   policy DEMO-VENCIDA : effective hoje-2a .. expiration hoje-1a   (vencida por data)
+#
+#   claim 1  incidente hoje-1m              -> DENTRO  da vigência    (passa)
+#   claim 2  incidente hoje+9m              -> FORA (após expiration) (falha)
+#   claim 3  incidente na policy vencida    -> FORA (já passou)       (falha)
+#   claim 4  incidente = effective_date     -> borda exata de início  (passa)
+# =============================================================================
+
+puts "Criando casos de vigência da demo (Sessão 5)..."
+
+demo_holder = Policyholder.find_or_create_by!(cpf: "111.111.111-11") do |p|
+  p.name         = "Demo Vigência (S5)"
+  p.email        = "demo.s5@safecover.test"
+  p.phone        = "11999990000"
+  p.birthdate    = Date.new(1990, 1, 1)
+  p.risk_profile = "low"
+end
+
+hoje = Date.current
+
+# Apólice vigente
+policy_ativa = Policy.find_or_create_by!(policyholder: demo_holder, policy_type: "auto", effective_date: hoje - 6.months) do |p|
+  p.status                = "active"
+  p.expiration_date       = hoje + 6.months
+  p.coverage_amount_cents = 5_000_000
+  p.monthly_premium_cents = 25_000
+end
+
+# Apólice "vencida" por DATA (expiration_date no passado).
+# Obs.: mantemos status "active" — o enum do model pode não ter "expired",
+# e a validação da demo é por DATA (incident_date vs expiration_date), não por status.
+policy_expirada = Policy.find_or_create_by!(policyholder: demo_holder, policy_type: "home", effective_date: hoje - 2.years) do |p|
+  p.status                = "active"
+  p.expiration_date       = hoje - 1.year
+  p.coverage_amount_cents = 4_000_000
+  p.monthly_premium_cents = 20_000
+end
+
+cobertura_ativa = PolicyCoverage.find_or_create_by!(policy: policy_ativa, coverage_type: "collision") do |c|
+  c.max_coverage_cents   = 5_000_000
+  c.deductible_cents     = 100_000
+  c.coverage_percentage  = 100
+end
+
+cobertura_expirada = PolicyCoverage.find_or_create_by!(policy: policy_expirada, coverage_type: "fire") do |c|
+  c.max_coverage_cents   = 4_000_000
+  c.deductible_cents     = 120_000
+  c.coverage_percentage  = 100
+end
+
+# claim 1 — DENTRO da vigência
+Claim.find_or_create_by!(policy: policy_ativa, incident_date: hoje - 1.month) do |c|
+  c.policy_coverage        = cobertura_ativa
+  c.status                 = "open"
+  c.description            = "[DEMO] Sinistro dentro da vigencia"
+  c.requested_amount_cents = 450_000
+end
+
+# claim 2 — FORA (após expiration_date)
+Claim.find_or_create_by!(policy: policy_ativa, incident_date: hoje + 9.months) do |c|
+  c.policy_coverage        = cobertura_ativa
+  c.status                 = "open"
+  c.description            = "[DEMO] Sinistro apos o fim da vigencia"
+  c.requested_amount_cents = 1_200_000
+end
+
+# claim 3 — FORA (apólice expirada)
+Claim.find_or_create_by!(policy: policy_expirada, incident_date: hoje - 6.months) do |c|
+  c.policy_coverage        = cobertura_expirada
+  c.status                 = "open"
+  c.description            = "[DEMO] Sinistro em apolice expirada"
+  c.requested_amount_cents = 300_000
+end
+
+# claim 4 — borda exata (incident_date == effective_date)
+Claim.find_or_create_by!(policy: policy_ativa, incident_date: policy_ativa.effective_date) do |c|
+  c.policy_coverage        = cobertura_ativa
+  c.status                 = "open"
+  c.description            = "[DEMO] Sinistro na data exata de inicio (borda)"
+  c.requested_amount_cents = 150_000
+end
+
+puts "  → policy vigente:  #{policy_ativa.effective_date} .. #{policy_ativa.expiration_date}"
+puts "  → policy expirada: #{policy_expirada.effective_date} .. #{policy_expirada.expiration_date}"
+puts "  → 4 claims da demo: dentro / fora / apólice expirada / borda"
