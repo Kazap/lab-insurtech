@@ -61,25 +61,28 @@ lab-insurtech/
 ├── .claude/
 │   ├── settings.json                  ← 4 hooks configurados
 │   ├── hooks/
-│   │   ├── inject-context.sh
-│   │   ├── validate-bash.sh
-│   │   └── secret-scan.sh
-│   └── skills/
-│       ├── review-changes/SKILL.md
-│       └── open-pr/SKILL.md
+│   │   ├── inject-context.sh           ← SessionStart: injeta estado do projeto
+│   │   ├── validate-bash.sh            ← PreToolUse(Bash): bloqueia comandos perigosos
+│   │   ├── secret-scan.sh              ← PreToolUse(Edit/Write): varre secrets
+│   │   └── format-file.sh              ← PostToolUse(Edit/Write): formata o arquivo
+│   ├── skills/
+│   │   ├── review-changes/SKILL.md
+│   │   └── open-pr/SKILL.md
+│   └── workflows/
+│       └── audit-controller-authz.js   ← workflow multi-agente de auditoria de authz
 ├── config/
 ├── db/migrate/                        ← 5 migrations
 ├── app/
 │   ├── models/                        ← Policyholder, Policy, PolicyCoverage, Claim, PremiumPayment
-│   ├── controllers/api/v1/
+│   ├── controllers/api/v1/            ← policyholders, policies, coverages, claims
 │   └── services/
 │       ├── result.rb
-│       ├── claims/
-│       ├── premiums/
-│       └── pii/
+│       ├── claims/evaluate_eligibility.rb
+│       ├── premiums/calculate_next_due_date.rb
+│       └── pii/masker.rb
 ├── spec/
-│   ├── models/
-│   ├── services/
+│   ├── models/                        ← um spec por model
+│   ├── services/                      ← specs de result, claims, premiums, pii
 │   └── factories.rb
 └── notes/
     ├── glossary.md
