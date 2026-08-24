@@ -33,3 +33,9 @@
 
 # Ignore master key
 /config/master.key
+
+# Relatórios de cobertura (SimpleCov)
+/coverage/
+
+# Sessoes do mutant
+/.mutant/

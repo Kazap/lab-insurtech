@@ -1,0 +1,25 @@
+# Mutation testing (Sessão 8 — Exercício 1).
+#
+#   bundle exec mutant run 'Elegibilidade*'      # um subject
+#   bundle exec mutant run 'Policy*'             # outro alvo
+#
+# `usage: opensource` é a licença gratuita do mutant — válida porque o repo
+# do treinamento é público. Repositório privado exige licença comercial.
+usage: opensource
+
+integration:
+  name: rspec
+
+# `spec` precisa entrar no load path para o `require` abaixo funcionar.
+includes:
+  - app
+  - spec
+
+# mutant_helper faz eager_load!: sem isso o Zeitwerk não carrega as constantes
+# e o mutant reporta "Subjects: 0".
+requires:
+  - mutant_helper
+
+mutation:
+  # `full` gera também mutações de operador de comparação (>= vira >, etc).
+  operators: full

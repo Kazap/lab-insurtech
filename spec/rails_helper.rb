@@ -1,4 +1,22 @@
+# frozen_string_literal: true
+
 ENV["RAILS_ENV"] ||= "test"
+
+# Cobertura opcional: `COVERAGE=1 bundle exec rspec`.
+# Precisa ser carregada ANTES do código da aplicação, senão os arquivos já
+# lidos pelo autoload não entram no relatório.
+if ENV["COVERAGE"]
+  require "simplecov"
+
+  SimpleCov.start "rails" do
+    enable_coverage :branch
+    add_filter "/spec/"
+    add_filter "/config/"
+    add_group "Concerns", "app/models/concerns"
+    add_group "Services", "app/services"
+  end
+end
+
 require_relative "../config/environment"
 
 # Garante que migrations estão aplicadas antes de rodar specs.
@@ -14,7 +32,7 @@ require "shoulda/matchers"
 require "factory_bot_rails"
 
 # Carrega arquivos de support
-Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+Rails.root.glob("spec/support/**/*.rb").each { |f| require f }
 
 RSpec.configure do |config|
   config.fixture_paths = [Rails.root.join("spec/fixtures").to_s]
