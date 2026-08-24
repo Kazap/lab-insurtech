@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PolicyCoverage < ApplicationRecord
   # Cobertura específica dentro de uma apólice.
   # Cada apólice pode ter várias coberturas — ex: auto cobre colisão E roubo.

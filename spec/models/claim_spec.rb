@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Claim do
@@ -21,18 +23,18 @@ RSpec.describe Claim do
   describe "callback :calculate_payout_amount" do
     let(:policy_coverage) do
       create(:policy_coverage,
-        max_coverage_cents: 50_000_00,
-        deductible_cents: 1_000_00,
-        coverage_percentage: 100)
+             max_coverage_cents: 50_000_00,
+             deductible_cents: 1_000_00,
+             coverage_percentage: 100)
     end
 
     let(:policy) { policy_coverage.policy }
 
     it "subtrai franquia do valor solicitado" do
       claim = build(:claim,
-        policy: policy,
-        policy_coverage: policy_coverage,
-        requested_amount_cents: 10_000_00)
+                    policy: policy,
+                    policy_coverage: policy_coverage,
+                    requested_amount_cents: 10_000_00)
 
       claim.save!
       # 10.000 - 1.000 = 9.000 (100% de cobertura)
@@ -42,9 +44,9 @@ RSpec.describe Claim do
     it "aplica percentual de cobertura" do
       policy_coverage.update!(coverage_percentage: 80)
       claim = build(:claim,
-        policy: policy,
-        policy_coverage: policy_coverage,
-        requested_amount_cents: 10_000_00)
+                    policy: policy,
+                    policy_coverage: policy_coverage,
+                    requested_amount_cents: 10_000_00)
 
       claim.save!
       # (10.000 - 1.000) * 0.8 = 7.200
@@ -54,9 +56,9 @@ RSpec.describe Claim do
     it "limita ao max_coverage da cobertura" do
       policy_coverage.update!(max_coverage_cents: 5_000_00)
       claim = build(:claim,
-        policy: policy,
-        policy_coverage: policy_coverage,
-        requested_amount_cents: 100_000_00)
+                    policy: policy,
+                    policy_coverage: policy_coverage,
+                    requested_amount_cents: 100_000_00)
 
       claim.save!
       expect(claim.payout_amount_cents).to eq(5_000_00)
@@ -64,9 +66,9 @@ RSpec.describe Claim do
 
     it "retorna zero quando valor solicitado é menor que franquia" do
       claim = build(:claim,
-        policy: policy,
-        policy_coverage: policy_coverage,
-        requested_amount_cents: 500_00)  # menor que deductible 1.000
+                    policy: policy,
+                    policy_coverage: policy_coverage,
+                    requested_amount_cents: 500_00) # menor que deductible 1.000
 
       claim.save!
       expect(claim.payout_amount_cents).to eq(0)

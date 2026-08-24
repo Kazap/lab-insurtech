@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PremiumPayment < ApplicationRecord
   # Pagamento mensal do prêmio da apólice.
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Policy < ApplicationRecord
   # Apólice de seguro. Contrato entre policyholder e SafeCover.
 
@@ -23,7 +25,7 @@ class Policy < ApplicationRecord
   def in_effect?(on_date = Date.current)
     return false unless status_active?
 
-    effective_date <= on_date && on_date <= expiration_date
+    on_date.between?(effective_date, expiration_date)
   end
 
   # FIXME(débito MVP): SQL injection clássico. Refatorar para usar placeholders.
@@ -31,12 +33,8 @@ class Policy < ApplicationRecord
   # Tem teste passando hoje, mas é vulnerável.
   def self.search_by_filters(filters = {})
     conditions = []
-    if filters[:cpf].present?
-      conditions << "policyholders.cpf = '#{filters[:cpf]}'"
-    end
-    if filters[:status].present?
-      conditions << "policies.status = '#{filters[:status]}'"
-    end
+    conditions << "policyholders.cpf = '#{filters[:cpf]}'" if filters[:cpf].present?
+    conditions << "policies.status = '#{filters[:status]}'" if filters[:status].present?
 
     joins(:policyholder).where(conditions.join(" AND "))
   end

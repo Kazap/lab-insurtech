@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Seeds para o lab-insurtech (SafeCover).
 # Popula dados fictícios suficientes para demo S4 e hands-on.
 
@@ -36,11 +38,11 @@ policies = policyholders.flat_map do |ph|
       monthly_premium_cents: rand(100..500) * 100
     ).tap do |policy|
       # Cada apólice tem 1-3 coberturas conforme tipo
-      coverages_for_type = case policy_type
-                           when "auto" then %w[collision theft third_party]
-                           when "home" then %w[fire theft flood]
-                           when "life" then %w[natural_death accidental_death disability]
-                           end
+      coverages_for_type = {
+        "auto" => %w[collision theft third_party],
+        "home" => %w[fire theft flood],
+        "life" => %w[natural_death accidental_death disability]
+      }.fetch(policy_type)
 
       coverages_for_type.sample(rand(1..3)).each do |ctype|
         PolicyCoverage.create!(
@@ -61,7 +63,7 @@ policies.each do |policy|
     policy_coverage = policy.policy_coverages.sample
     next unless policy_coverage
 
-    incident = policy.effective_date + rand(1..(policy.expiration_date - policy.effective_date).to_i - 1).days
+    incident = policy.effective_date + rand(1..((policy.expiration_date - policy.effective_date).to_i - 1)).days
     Claim.create!(
       policy: policy,
       policy_coverage: policy_coverage,
@@ -138,7 +140,8 @@ end
 hoje = Date.current
 
 # Apólice vigente
-policy_ativa = Policy.find_or_create_by!(policyholder: demo_holder, policy_type: "auto", effective_date: hoje - 6.months) do |p|
+policy_ativa = Policy.find_or_create_by!(policyholder: demo_holder, policy_type: "auto",
+                                         effective_date: hoje - 6.months) do |p|
   p.status                = "active"
   p.expiration_date       = hoje + 6.months
   p.coverage_amount_cents = 5_000_000
@@ -148,7 +151,8 @@ end
 # Apólice "vencida" por DATA (expiration_date no passado).
 # Obs.: mantemos status "active" — o enum do model pode não ter "expired",
 # e a validação da demo é por DATA (incident_date vs expiration_date), não por status.
-policy_expirada = Policy.find_or_create_by!(policyholder: demo_holder, policy_type: "home", effective_date: hoje - 2.years) do |p|
+policy_expirada = Policy.find_or_create_by!(policyholder: demo_holder, policy_type: "home",
+                                            effective_date: hoje - 2.years) do |p|
   p.status                = "active"
   p.expiration_date       = hoje - 1.year
   p.coverage_amount_cents = 4_000_000

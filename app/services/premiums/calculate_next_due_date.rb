@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Premiums
   # Calcula próxima data de vencimento de prêmio para uma apólice.
   # Regra: dia 5 do mês seguinte ao último pagamento confirmado.

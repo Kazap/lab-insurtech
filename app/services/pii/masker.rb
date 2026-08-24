@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Pii
   # Mascara dados pessoais antes de retornar em respostas API ou logs.
   #

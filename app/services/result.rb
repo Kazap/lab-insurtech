@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Result base para retornos de service objects.
 #
 # Padrão:

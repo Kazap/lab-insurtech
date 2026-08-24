@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "boot"
 
 require "rails"
@@ -28,7 +30,7 @@ module SafeCover
 
     # Locale padrão pt-BR (mensagens de erro para usuário final)
     config.i18n.default_locale = :"pt-BR"
-    config.i18n.available_locales = [:"pt-BR", :en]
+    config.i18n.available_locales = %i[pt-BR en]
     config.i18n.fallbacks = [:en]
   end
 end

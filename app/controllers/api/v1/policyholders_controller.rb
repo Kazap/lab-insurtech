@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Api
   module V1
     class PolicyholdersController < ApplicationController
@@ -5,7 +7,7 @@ module Api
       #
       # Endpoint correto: usa Pii::Masker para dados sensíveis.
       def show
-        policyholder = Policyholder.find(params[:id])
+        policyholder = Policyholder.find(params.expect(:id))
 
         render json: {
           id: policyholder.id,

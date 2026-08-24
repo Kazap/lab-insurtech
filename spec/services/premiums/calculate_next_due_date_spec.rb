@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Premiums::CalculateNextDueDate do
@@ -21,9 +23,9 @@ RSpec.describe Premiums::CalculateNextDueDate do
       it "retorna dia 5 do mês seguinte ao último pagamento" do
         policy = create(:policy)
         create(:premium_payment,
-          policy: policy,
-          status: "paid",
-          due_date: Date.new(2026, 5, 5))
+               policy: policy,
+               status: "paid",
+               due_date: Date.new(2026, 5, 5))
 
         result = described_class.call(policy: policy)
         expect(result.data).to eq(Date.new(2026, 6, 5))

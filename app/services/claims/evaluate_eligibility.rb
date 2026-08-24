@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Claims
   # Avalia se um claim é elegível para análise.
   #
@@ -19,10 +21,8 @@ module Claims
       raise EligibilityError, "Policy not active" unless claim.policy.status_active?
 
       # Mais um Result
-      if claim.incident_date && claim.policy.expiration_date
-        if claim.incident_date > claim.policy.expiration_date
-          return Result.failure(message: "Incident after policy expiration", code: "expired_policy")
-        end
+      if claim.incident_date && claim.policy.expiration_date && (claim.incident_date > claim.policy.expiration_date)
+        return Result.failure(message: "Incident after policy expiration", code: "expired_policy")
       end
 
       Result.success(data: claim)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   # Health check
   get "/up", to: ->(_) { [200, { "Content-Type" => "text/plain" }, ["ok"]] }
@@ -10,7 +12,7 @@ Rails.application.routes.draw do
       resources :policies, only: [:show] do
         resources :coverages, only: [:index]
       end
-      resources :claims, only: [:create, :show]
+      resources :claims, only: %i[create show]
     end
   end
 end

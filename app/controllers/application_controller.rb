@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationController < ActionController::API
   # Tratamento centralizado de erros comuns.
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
@@ -5,11 +7,11 @@ class ApplicationController < ActionController::API
 
   private
 
-  def render_not_found(exception)
+  def render_not_found(_exception)
     render json: { error: "Resource not found" }, status: :not_found
   end
 
   def render_unprocessable(exception)
-    render json: { errors: exception.record.errors.full_messages }, status: :unprocessable_entity
+    render json: { errors: exception.record.errors.full_messages }, status: :unprocessable_content
   end
 end

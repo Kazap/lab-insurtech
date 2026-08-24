@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Policy do
@@ -23,9 +25,9 @@ RSpec.describe Policy do
   describe "#in_effect?" do
     let(:policy) do
       build(:policy,
-        effective_date: 1.month.ago.to_date,
-        expiration_date: 11.months.from_now.to_date,
-        status: "active")
+            effective_date: 1.month.ago.to_date,
+            expiration_date: 11.months.from_now.to_date,
+            status: "active")
     end
 
     it "retorna true para apólice ativa dentro da vigência" do

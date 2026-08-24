@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-rails
   - rubocop-rspec
 
@@ -40,6 +40,12 @@ Metrics/BlockLength:
     - "spec/**/*"
     - "config/routes.rb"
     - "config/environments/*"
+    - "db/seeds.rb"
+
+# Seeds são script de linha de comando: `puts` é o canal certo para o operador.
+Rails/Output:
+  Exclude:
+    - "db/seeds.rb"
 
 # Models e specs com muitas validações ficam longos naturalmente
 Metrics/ClassLength:
@@ -57,3 +63,13 @@ RSpec/NestedGroups:
 
 RSpec/MultipleMemoizedHelpers:
   Max: 8
+
+# Specs deste projeto são escritos em português.
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - quando
+    - com
+    - sem

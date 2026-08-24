@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Api
   module V1
     class PoliciesController < ApplicationController
@@ -7,7 +9,7 @@ module Api
       # Veja CLAUDE.md seção "PII e LGPD" — deve usar Pii::Masker.
       # Issue #38 no Jira.
       def show
-        policy = Policy.includes(:policyholder, :policy_coverages).find(params[:id])
+        policy = Policy.includes(:policyholder, :policy_coverages).find(params.expect(:id))
 
         render json: {
           id: policy.id,
@@ -17,7 +19,7 @@ module Api
           expiration_date: policy.expiration_date,
           coverage_amount: format_cents(policy.coverage_amount_cents),
           monthly_premium: format_cents(policy.monthly_premium_cents),
-          policyholder: policy.policyholder.as_json,  # <-- PII exposta aqui
+          policyholder: policy.policyholder.as_json, # <-- PII exposta aqui
           coverages: policy.policy_coverages.map { |c| coverage_payload(c) }
         }
       end
@@ -37,7 +39,7 @@ module Api
       def format_cents(cents)
         return nil if cents.nil?
 
-        "R$ #{format('%.2f', cents / 100.0)}"
+        "R$ #{format("%.2f", cents / 100.0)}"
       end
     end
   end

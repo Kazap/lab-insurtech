@@ -77,7 +77,7 @@ end
 Sempre em centavos (`Integer`). Nunca `Float` ou `BigDecimal` no banco. Conversão para reais apenas na camada de apresentação:
 
 ```ruby
-"R$ #{format('%.2f', cents / 100.0)}"
+"R$ #{format("%.2f", cents / 100.0)}"
 ```
 
 ### Datas e vigências

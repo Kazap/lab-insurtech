@@ -1,6 +1,14 @@
+# frozen_string_literal: true
+
 module Api
   module V1
     class ClaimsController < ApplicationController
+      # GET /api/v1/claims/:id
+      def show
+        claim = Claim.find(params.expect(:id))
+        render json: claim_payload(claim)
+      end
+
       # GET /api/v1/policyholders/:policyholder_id/claims
       #
       # NÃO IMPLEMENTADO ainda — alvo da demo da Sessão 4.
@@ -18,33 +26,27 @@ module Api
         eligibility = Claims::EvaluateEligibility.call(claim: claim)
         if eligibility.failure?
           return render json: { error: eligibility.message, code: eligibility.code },
-                        status: :unprocessable_entity
+                        status: :unprocessable_content
         end
 
         if claim.save
           render json: claim_payload(claim), status: :created
         else
-          render json: { errors: claim.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: claim.errors.full_messages }, status: :unprocessable_content
         end
       rescue Claims::EvaluateEligibility::EligibilityError => e
         # FIXME(débito MVP): este rescue só existe porque EvaluateEligibility
         # ainda levanta exception em vez de retornar Result. Remover quando
         # o service for unificado.
-        render json: { error: e.message }, status: :unprocessable_entity
-      end
-
-      # GET /api/v1/claims/:id
-      def show
-        claim = Claim.find(params[:id])
-        render json: claim_payload(claim)
+        render json: { error: e.message }, status: :unprocessable_content
       end
 
       private
 
       def claim_params
-        params.require(:claim).permit(
-          :policy_id, :policy_coverage_id, :incident_date,
-          :description, :requested_amount_cents
+        params.expect(
+          claim: %i[policy_id policy_coverage_id incident_date
+                    description requested_amount_cents]
         )
       end
 
@@ -63,7 +65,7 @@ module Api
       def format_cents(cents)
         return nil if cents.nil?
 
-        "R$ #{format('%.2f', cents / 100.0)}"
+        "R$ #{format("%.2f", cents / 100.0)}"
       end
     end
   end

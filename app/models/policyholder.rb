@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Policyholder < ApplicationRecord
   # Pessoa física que contrata seguro.
 

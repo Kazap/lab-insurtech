@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Claims::EvaluateEligibility do
@@ -5,7 +7,7 @@ RSpec.describe Claims::EvaluateEligibility do
   # do service. Alguns paths retornam Result, outros levantam EligibilityError.
   # Quando o service for unificado, todos os testes devem usar pattern Result.
   describe ".call" do
-    context "retornos via Result (caminho correto)" do
+    context "quando o retorno vem via Result (caminho correto)" do
       it "retorna failure quando claim é nil" do
         result = described_class.call(claim: nil)
         expect(result).to be_failure
@@ -23,9 +25,9 @@ RSpec.describe Claims::EvaluateEligibility do
 
       it "retorna success quando tudo está OK" do
         policy = create(:policy,
-          status: "active",
-          effective_date: 1.month.ago.to_date,
-          expiration_date: 11.months.from_now.to_date)
+                        status: "active",
+                        effective_date: 1.month.ago.to_date,
+                        expiration_date: 11.months.from_now.to_date)
         claim = build(:claim, policy: policy, incident_date: Date.current)
 
         result = described_class.call(claim: claim)
@@ -33,14 +35,14 @@ RSpec.describe Claims::EvaluateEligibility do
       end
     end
 
-    context "retornos via exception (vício pedagógico)" do
+    context "quando o retorno vem via exception (vício pedagógico)" do
       it "levanta EligibilityError quando policy está suspended" do
         policy = create(:policy, status: "suspended")
         claim = build(:claim, policy: policy)
 
-        expect {
+        expect do
           described_class.call(claim: claim)
-        }.to raise_error(described_class::EligibilityError, /not active/)
+        end.to raise_error(described_class::EligibilityError, /not active/)
       end
     end
   end

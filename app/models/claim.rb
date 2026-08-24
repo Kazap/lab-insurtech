@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Claim < ApplicationRecord
   # Sinistro: evento que dispara cobertura da apólice.
 
